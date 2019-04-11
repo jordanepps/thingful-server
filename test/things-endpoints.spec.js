@@ -49,6 +49,7 @@ describe('Things Endpoints', function() {
 				);
 				return supertest(app)
 					.get('/api/things')
+					.set('Authorization', makeAuthHeader(testUsers[0]))
 					.expect(200, expectedThings);
 			});
 		});
