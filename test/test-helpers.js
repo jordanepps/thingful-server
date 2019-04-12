@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 function makeUsersArray() {
 	return [
 		{
@@ -230,6 +231,22 @@ function cleanTables(db) {
 	);
 }
 
+function seedUsers(db, users) {
+	const preppedUsers = users.map(user => ({
+		...user,
+		password: bcrypt.hashSync(user.password, 1)
+	}));
+	return db
+		.into('blogful_users')
+		.insert(preppedUsers)
+		.then(() =>
+			// update the auto sequence to stay in sync
+			db.raw(`SELECT setval('blogful_users_id_seq', ?)`, [
+				users[users.length - 1].id
+			])
+		);
+}
+
 function seedThingsTables(db, users, things, reviews = []) {
 	return db
 		.into('thingful_users')
@@ -264,5 +281,6 @@ module.exports = {
 	cleanTables,
 	seedThingsTables,
 	seedMaliciousThing,
-	makeAuthHeader
+	makeAuthHeader,
+	seedUsers
 };
