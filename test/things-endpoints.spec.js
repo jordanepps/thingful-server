@@ -7,13 +7,6 @@ describe('Things Endpoints', function() {
 
 	const { testUsers, testThings, testReviews } = helpers.makeThingsFixtures();
 
-	function makeAuthHeader(user) {
-		const token = Buffer.from(`${user.user_name}:${user.password}`).toString(
-			'base64'
-		);
-		return `Basic ${token}`;
-	}
-
 	before('make knex instance', () => {
 		db = knex({
 			client: 'pg',
@@ -33,7 +26,7 @@ describe('Things Endpoints', function() {
 			it(`responds with 200 and an empty list`, () => {
 				return supertest(app)
 					.get('/api/things')
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200, []);
 			});
 		});
@@ -43,13 +36,13 @@ describe('Things Endpoints', function() {
 				helpers.seedThingsTables(db, testUsers, testThings, testReviews)
 			);
 
-			it('responds with 200 and all of the things', () => {
+			it.only('responds with 200 and all of the things', () => {
 				const expectedThings = testThings.map(thing =>
 					helpers.makeExpectedThing(testUsers, thing, testReviews)
 				);
 				return supertest(app)
 					.get('/api/things')
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200, expectedThings);
 			});
 		});
@@ -67,7 +60,7 @@ describe('Things Endpoints', function() {
 			it('removes XSS attack content', () => {
 				return supertest(app)
 					.get(`/api/things`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200)
 					.expect(res => {
 						expect(res.body[0].title).to.eql(expectedThing.title);
@@ -84,7 +77,7 @@ describe('Things Endpoints', function() {
 				const thingId = 123456;
 				return supertest(app)
 					.get(`/api/things/${thingId}`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(404, { error: `Thing doesn't exist` });
 			});
 		});
@@ -104,7 +97,7 @@ describe('Things Endpoints', function() {
 
 				return supertest(app)
 					.get(`/api/things/${thingId}`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200, expectedThing);
 			});
 
@@ -112,7 +105,7 @@ describe('Things Endpoints', function() {
 				const userNoCreds = { user_name: '', password: '' };
 				return supertest(app)
 					.get(`/api/things/123`)
-					.set('Authorization', makeAuthHeader(userNoCreds))
+					.set('Authorization', helpers.makeAuthHeader(userNoCreds))
 					.expect(401, { error: `Unauthorized request` });
 			});
 
@@ -123,7 +116,7 @@ describe('Things Endpoints', function() {
 				};
 				return supertest(app)
 					.get(`/api/things/1`)
-					.set('Authorization', makeAuthHeader(userInvalidPass))
+					.set('Authorization', helpers.makeAuthHeader(userInvalidPass))
 					.expect(401, { error: `Unauthorized request` });
 			});
 		});
@@ -141,7 +134,7 @@ describe('Things Endpoints', function() {
 			it('removes XSS attack content', () => {
 				return supertest(app)
 					.get(`/api/things/${maliciousThing.id}`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200)
 					.expect(res => {
 						expect(res.body.title).to.eql(expectedThing.title);
@@ -157,7 +150,7 @@ describe('Things Endpoints', function() {
 				const thingId = 123456;
 				return supertest(app)
 					.get(`/api/things/${thingId}/reviews`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(404, { error: `Thing doesn't exist` });
 			});
 		});
@@ -177,7 +170,7 @@ describe('Things Endpoints', function() {
 
 				return supertest(app)
 					.get(`/api/things/${thingId}/reviews`)
-					.set('Authorization', makeAuthHeader(testUsers[0]))
+					.set('Authorization', helpers.makeAuthHeader(testUsers[0]))
 					.expect(200, expectedReviews);
 			});
 		});

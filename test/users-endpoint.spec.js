@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
 
-describe.only('Users Endpoints', function() {
+describe('Users Endpoints', function() {
 	let db;
 
 	const { testUsers } = helpers.makeThingsFixtures();
@@ -67,8 +67,7 @@ describe.only('Users Endpoints', function() {
 					password: '*'.repeat(73),
 					full_name: 'test full_name'
 				};
-				// console.log(userLongPassword)
-				// console.log(userLongPassword.password.length)
+
 				return supertest(app)
 					.post('/api/users')
 					.send(userLongPassword)
@@ -129,8 +128,8 @@ describe.only('Users Endpoints', function() {
 					.expect(400, { error: `Username already taken` });
 			});
 		});
-		context('Hapy path', () => {
-			it(`responds 201, serialized user, storing bcryped password`, () => {
+		context('Happy path', () => {
+			it(`responds 201, serialized user, storing bcrypted password`, () => {
 				const newUser = {
 					user_name: 'test user_name',
 					password: '11AAaa!!',
@@ -150,7 +149,12 @@ describe.only('Users Endpoints', function() {
 						const expectedDate = new Date().toLocaleString('en', {
 							timeZone: 'UTC'
 						});
-						const actualDate = new Date(res.body.date_created).toLocaleString();
+						const actualDate = new Date(res.body.date_created).toLocaleString(
+							'en',
+							{
+								timeZone: 'UTC'
+							}
+						);
 						expect(actualDate).to.eql(expectedDate);
 					})
 					.expect(res =>
@@ -163,9 +167,7 @@ describe.only('Users Endpoints', function() {
 								expect(row.user_name).to.eql(newUser.user_name);
 								expect(row.full_name).to.eql(newUser.full_name);
 								expect(row.nickname).to.eql(null);
-								const expectedDate = new Date().toLocaleString('en', {
-									timeZone: 'UTC'
-								});
+								const expectedDate = new Date().toLocaleString();
 								const actualDate = new Date(row.date_created).toLocaleString();
 								expect(actualDate).to.eql(expectedDate);
 								return bcrypt.compare(newUser.password, row.password);

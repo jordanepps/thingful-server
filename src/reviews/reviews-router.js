@@ -16,7 +16,7 @@ reviewsRouter.route('/').post(requireAuth, jsonBodyParser, (req, res, next) => {
 				error: `Missing '${key}' in request body`
 			});
 
-	newReview.user_id = req.user.id;
+	newReview.user_id = user_id;
 
 	ReviewsService.insertReview(req.app.get('db'), newReview)
 		.then(review => {
